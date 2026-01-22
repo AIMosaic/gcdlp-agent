@@ -2,27 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        /* 1. RESET & COLORS */
+        /* 1. LAYOUT RESET */
+        * { box-sizing: border-box; }
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* Brand Beige */
-            overflow: hidden; /* No scrollbars */
+            background-color: #FEF9EE; 
+            overflow: hidden; 
         }
 
-        /* 2. FORCE CHAT TO FILL SCREEN */
+        /* 2. COMPONENT STYLING (The Correct Way) */
         openai-chatkit { 
             display: block;
-            height: 100vh; 
-            width: 100vw; 
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            
+            /* WE SET COLORS HERE NOW, NOT IN JS */
+            --ck-body-background: #FEF9EE;
+            --ck-message-user-background: #978550;
+            --ck-primary-text: #978550;
+            --ck-secondary-text: #5a5a5a;
+            --ck-border-radius: 8px;
         }
 
-        /* 3. HIDE VERCEL TOOLBAR (The black bar) */
-        vercel-live-feedback, #vercel-toolbar { display: none !important; }
+        /* 3. Hide Toolbar */
+        vercel-live-feedback { display: none !important; }
     </style>
 </head>
 <body>
@@ -30,37 +40,30 @@
         const TOKEN_URL = "/api/token"; 
 
         async function init() {
-            // Wait for Library
-            await customElements.whenDefined('openai-chatkit');
-            
-            // Create Chat
-            const chat = document.createElement('openai-chatkit');
-            
-            // Configure
-            chat.setOptions({
-                api: {
-                    // Fetch the working token
-                    getClientSecret: async () => {
-                        const res = await fetch(TOKEN_URL, { method: 'POST' });
-                        const data = await res.json();
-                        return data.client_secret;
-                    }
-                },
-                theme: 'light',
-                header: {
-                    title: 'Grand Café Concierge',
-                    style: { backgroundColor: '#FEF9EE', color: '#978550', borderBottom: '1px solid #978550' }
-                },
-                style: {
-                    '--ck-body-background': '#FEF9EE',
-                    '--ck-message-user-background': '#978550',
-                    '--ck-primary-text': '#978550',
-                    '--ck-secondary-text': '#5a5a5a',
-                }
-            });
+            try {
+                await customElements.whenDefined('openai-chatkit');
+                const chat = document.createElement('openai-chatkit');
+                
+                // --- THE FIX: SIMPLIFIED CONFIG ---
+                // We removed 'style' and 'header' to stop the crash.
+                chat.setOptions({
+                    api: {
+                        getClientSecret: async () => {
+                            const res = await fetch(TOKEN_URL, { method: 'POST' });
+                            const data = await res.json();
+                            return data.client_secret;
+                        }
+                    },
+                    // We can add 'theme' if supported, but let's keep it safe.
+                    theme: 'light' 
+                });
 
-            // Show it
-            document.body.appendChild(chat);
+                document.body.appendChild(chat);
+                console.log("Chat started successfully");
+
+            } catch (err) {
+                document.body.innerHTML = `<div style="color:red; padding:20px;">Error: ${err.message}</div>`;
+            }
         }
         
         init();
