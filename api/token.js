@@ -1,25 +1,28 @@
 // FILENAME: api/token.js
-// Purpose: Generates a session token AND injects the "Brain" (Instructions)
+// This is a "Serverless Function" ready for Vercel.
 
 export default async function handler(req, res) {
+  // 1. Get the API Key
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
     return res.status(500).json({ error: 'Server Error: Missing API Key' });
   }
 
-  // CORS: Allow your website to talk to this server
+  // 2. Handle CORS (Allow your website)
   const allowedOrigins = [
     'https://grandcafedelaposte.restaurant', 
     'https://www.grandcafedelaposte.restaurant',
-    'http://localhost:3000'
+    'http://localhost:3000' 
   ];
+  
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*'); 
   }
+  
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -27,8 +30,8 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // --- THE BRAIN (INSTRUCTIONS) ---
-  // We inject this directly because Realtime API doesn't read the Agent Builder ID yet.
+  // 3. THE BRAIN (Instructions for the Agent)
+  // This tells the AI who it is and how to behave.
   const SYSTEM_INSTRUCTIONS = `
     You are the "Grand Café Concierge," a digital Maître d' for Grand Café de la Poste in Marrakech.
     Tone: Welcoming, Sophisticated, French-Moroccan Hospitality.
@@ -51,6 +54,7 @@ export default async function handler(req, res) {
     - Direct specific booking queries to the buttons provided in the UI.
   `;
 
+  // 4. The Logic: Call OpenAI to get a Session Token
   try {
     const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
       method: 'POST',
@@ -61,14 +65,14 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview-2024-10-01",
         voice: "alloy",
-        instructions: SYSTEM_INSTRUCTIONS, // <--- This connects the brain!
+        instructions: SYSTEM_INSTRUCTIONS, // <--- CRITICAL ADDITION
       }),
     });
 
     if (!response.ok) {
         const errorText = await response.text();
         console.error("OpenAI API Error:", errorText);
-        return res.status(response.status).json({ error: 'Failed to fetch token' });
+        return res.status(response.status).json({ error: 'Failed to fetch token from OpenAI' });
     }
 
     const data = await response.json();
