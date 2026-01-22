@@ -6,16 +6,14 @@ export default async function handler(req, res) {
   if (!OPENAI_API_KEY) return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
   if (!WORKFLOW_ID) return res.status(500).json({ error: 'Missing WORKFLOW_ID' });
 
-  // 1. CORS: Allow your Staging Site to talk to Vercel
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const userID = "guest-" + Math.random().toString(36).substring(7);
-
   try {
-    // 2. Call OpenAI with "trusted_origins"
+    // Standard Call to OpenAI
     const response = await fetch('https://api.openai.com/v1/chatkit/sessions', {
       method: 'POST',
       headers: {
@@ -24,16 +22,8 @@ export default async function handler(req, res) {
         'OpenAI-Beta': 'chatkit_beta=v1'
       },
       body: JSON.stringify({ 
-        workflow: { id: WORKFLOW_ID },
-        user: userID,
-        
-        // --- THE MAGIC FIX ---
-        // We explicitly tell OpenAI to trust your website.
-        // Note: We use the ROOT domain (Origin), not the full path.
-        trusted_origins: [
-            "https://www.grandcafedelaposte.restaurant",
-            "https://grandcafedelaposte.restaurant"
-        ]
+        workflow: { id: WORKFLOW_ID }
+        // REMOVED: trusted_origins (This was causing the error)
       }),
     });
 
