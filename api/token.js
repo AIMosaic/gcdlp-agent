@@ -6,12 +6,13 @@ export default async function handler(req, res) {
   if (!OPENAI_API_KEY) return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
   if (!WORKFLOW_ID) return res.status(500).json({ error: 'Missing WORKFLOW_ID' });
 
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // 1. Create a random User ID (Required by OpenAI)
+  // Create a random Guest ID
   const userID = "guest-" + Math.random().toString(36).substring(7);
 
   try {
@@ -24,10 +25,8 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({ 
         workflow: { id: WORKFLOW_ID },
-        // 2. THIS IS THE FIX: We add the 'user' parameter back
-        user: { 
-            id: userID,
-        } 
+        // THE FIX: Send it as a direct string, not an object
+        user: userID 
       }),
     });
 
