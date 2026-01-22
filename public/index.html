@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grand Café Concierge</title>
+    <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: transparent; }
+        /* Make the chat fill the iframe */
+        openai-chatkit { height: 100vh; width: 100vw; }
+    </style>
+</head>
+<body>
+    <script>
+        // 2. Connect to the Internal API (Since we are now ON Vercel, this is local)
+        const TOKEN_URL = "/api/token"; 
+
+        async function init() {
+            await customElements.whenDefined('openai-chatkit');
+            const chat = document.createElement('openai-chatkit');
+            
+            chat.setOptions({
+                api: {
+                    getClientSecret: async () => {
+                        const res = await fetch(TOKEN_URL, { method: 'POST' });
+                        const data = await res.json();
+                        return data.client_secret;
+                    }
+                },
+                theme: 'light',
+                header: {
+                    title: 'Grand Café Concierge',
+                    style: { backgroundColor: '#FEF9EE', color: '#978550', borderBottom: '1px solid #978550' }
+                },
+                style: {
+                    '--ck-body-background': '#FEF9EE',
+                    '--ck-message-user-background': '#978550',
+                    '--ck-primary-text': '#978550',
+                    '--ck-secondary-text': '#5a5a5a',
+                }
+            });
+            document.body.appendChild(chat);
+        }
+        init();
+    </script>
+</body>
+</html>
