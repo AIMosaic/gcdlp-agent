@@ -1,42 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        /* 1. FORCE BEIGE BACKGROUND */
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* YOUR BRAND COLOUR */
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #FEF9EE; /* Brand Beige */
             overflow: hidden;
         }
+        /* Ensure the chat component fills the window */
         openai-chatkit { height: 100vh; width: 100vw; }
-        
-        /* Loading Text */
-        #loader {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #978550; font-size: 14px; letter-spacing: 1px;
-        }
     </style>
 </head>
 <body>
-    <div id="loader">INITIALISATION DU CONCIERGE...</div>
-
     <script>
         const TOKEN_URL = "/api/token"; 
 
         async function init() {
-            // Wait for the component
+            // 1. Wait for the component to be ready
             await customElements.whenDefined('openai-chatkit');
             
+            // 2. Create the Chat Element
             const chat = document.createElement('openai-chatkit');
+            
+            // 3. Configure it
             chat.setOptions({
                 api: {
+                    // Fetch the token from your now-working backend
                     getClientSecret: async () => {
                         const res = await fetch(TOKEN_URL, { method: 'POST' });
                         const data = await res.json();
@@ -49,17 +43,20 @@
                     style: { backgroundColor: '#FEF9EE', color: '#978550', borderBottom: '1px solid #978550' }
                 },
                 style: {
+                    // Custom Branding Colors
                     '--ck-body-background': '#FEF9EE',
                     '--ck-message-user-background': '#978550',
                     '--ck-primary-text': '#978550',
                     '--ck-secondary-text': '#5a5a5a',
+                    '--ck-border-radius': '8px',
                 }
             });
 
-            // Remove loader and add chat
-            document.getElementById('loader').style.display = 'none';
+            // 4. Add to screen
             document.body.appendChild(chat);
         }
+        
+        // Start
         init();
     </script>
 </body>
