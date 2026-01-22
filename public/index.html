@@ -1,63 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Grand Café Concierge</title>
+    <title>Grand Café Concierge - Debug</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        body, html { 
-            margin: 0; padding: 0; 
-            height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* Brand Beige */
-            overflow: hidden;
+        body { background-color: #FEF9EE; font-family: sans-serif; padding: 20px; color: #5a5a5a; }
+        #status-box { 
+            background: white; border: 2px solid #978550; 
+            padding: 15px; margin-bottom: 20px; border-radius: 8px;
         }
-        /* Ensure the chat component fills the window */
-        openai-chatkit { height: 100vh; width: 100vw; }
+        .log-entry { margin: 5px 0; border-bottom: 1px solid #eee; padding-bottom: 2px; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        button {
+            padding: 10px 20px; background: #978550; color: white; 
+            border: none; font-size: 16px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <h2>Debug Console</h2>
+    <div id="status-box">Waiting to start...</div>
+    <button onclick="startChat()">🚀 Force Start Chat</button>
+
     <script>
         const TOKEN_URL = "/api/token"; 
+        const consoleBox = document.getElementById('status-box');
 
-        async function init() {
-            // 1. Wait for the component to be ready
-            await customElements.whenDefined('openai-chatkit');
-            
-            // 2. Create the Chat Element
-            const chat = document.createElement('openai-chatkit');
-            
-            // 3. Configure it
-            chat.setOptions({
-                api: {
-                    // Fetch the token from your now-working backend
-                    getClientSecret: async () => {
-                        const res = await fetch(TOKEN_URL, { method: 'POST' });
-                        const data = await res.json();
-                        return data.client_secret;
-                    }
-                },
-                theme: 'light',
-                header: {
-                    title: 'Grand Café Concierge',
-                    style: { backgroundColor: '#FEF9EE', color: '#978550', borderBottom: '1px solid #978550' }
-                },
-                style: {
-                    // Custom Branding Colors
-                    '--ck-body-background': '#FEF9EE',
-                    '--ck-message-user-background': '#978550',
-                    '--ck-primary-text': '#978550',
-                    '--ck-secondary-text': '#5a5a5a',
-                    '--ck-border-radius': '8px',
+        function log(msg, type="neutral") {
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.innerText = `> ${msg}`;
+            consoleBox.appendChild(div);
+        }
+
+        async function startChat() {
+            consoleBox.innerHTML = ""; // Clear
+            log("Starting initialization...");
+
+            try {
+                // CHECK 1: Library
+                if (customElements.get('openai-chatkit')) {
+                    log("Library already loaded.", "success");
+                } else {
+                    log("Waiting for ChatKit library...");
+                    await customElements.whenDefined('openai-chatkit');
+                    log("Library loaded successfully.", "success");
                 }
-            });
 
-            // 4. Add to screen
-            document.body.appendChild(chat);
+                // CHECK 2: Token
+                log("Fetching Secret Token...");
+                const res = await fetch(TOKEN_URL, { method: 'POST' });
+                log(`API HTTP Status: ${res.status}`);
+                
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error(`API Failed: ${text}`);
+                }
+
+                const data = await res.json();
+                if (!data.client_secret) throw new Error("Token missing from response!");
+                log("Token received successfully.", "success");
+
+                // CHECK 3: Render
+                log("Injecting Chat Window...");
+                const chat = document.createElement('openai-chatkit');
+                
+                chat.setOptions({
+                    api: {
+                        getClientSecret: async () => {
+                            log("ChatKit requested token. Providing it...", "success");
+                            return data.client_secret;
+                        }
+                    },
+                    theme: 'light',
+                    header: { title: 'Concierge Debug' }
+                });
+
+                document.body.appendChild(chat);
+                log("Chat appended to body. Check bottom of screen.", "success");
+
+            } catch (err) {
+                log(`CRITICAL ERROR: ${err.message}`, "error");
+            }
         }
         
-        // Start
-        init();
+        // Auto-start
+        window.addEventListener('load', startChat);
     </script>
 </body>
 </html>
