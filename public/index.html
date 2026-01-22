@@ -6,20 +6,35 @@
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: transparent; }
-        /* Make the chat fill the iframe */
+        /* 1. FORCE BEIGE BACKGROUND */
+        body, html { 
+            margin: 0; padding: 0; 
+            height: 100%; width: 100%; 
+            background-color: #FEF9EE; /* YOUR BRAND COLOUR */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
         openai-chatkit { height: 100vh; width: 100vw; }
+        
+        /* Loading Text */
+        #loader {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #978550; font-size: 14px; letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
+    <div id="loader">INITIALISATION DU CONCIERGE...</div>
+
     <script>
-        // 2. Connect to the Internal API (Since we are now ON Vercel, this is local)
         const TOKEN_URL = "/api/token"; 
 
         async function init() {
+            // Wait for the component
             await customElements.whenDefined('openai-chatkit');
-            const chat = document.createElement('openai-chatkit');
             
+            const chat = document.createElement('openai-chatkit');
             chat.setOptions({
                 api: {
                     getClientSecret: async () => {
@@ -40,6 +55,9 @@
                     '--ck-secondary-text': '#5a5a5a',
                 }
             });
+
+            // Remove loader and add chat
+            document.getElementById('loader').style.display = 'none';
             document.body.appendChild(chat);
         }
         init();
