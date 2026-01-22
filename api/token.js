@@ -1,66 +1,44 @@
 // FILENAME: api/token.js
 export default async function handler(req, res) {
-  // 1. Get the API Key from Vercel Environment Variables
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const WORKFLOW_ID = process.env.WORKFLOW_ID;
 
-  if (!OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Server Error: Missing API Key' });
-  }
+  // 1. Check if Keys exist on Vercel
+  if (!OPENAI_API_KEY) return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
+  if (!WORKFLOW_ID) return res.status(500).json({ error: 'Missing WORKFLOW_ID in Vercel Env Vars' });
 
-  // 2. Handle CORS (Allow your WordPress site)
-  const allowedOrigins = [
-    'https://grandcafedelaposte.restaurant', 
-    'https://www.grandcafedelaposte.restaurant',
-    'http://localhost:3000' 
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    // Optional: allow all for testing, but restrict for production
-    res.setHeader('Access-Control-Allow-Origin', '*'); 
-  }
-  
+  // 2. Allow CORS
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // 3. Connect to Agent Builder (ChatKit)
-  // We need your Workflow ID here. 
-  // You can hardcode it below OR add it to Vercel Env Vars as WORKFLOW_ID.
-  const WORKFLOW_ID = process.env.WORKFLOW_ID || "wf_REPLACE_WITH_YOUR_ID"; 
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // [cite: 464, 468] Using the ChatKit session endpoint
+    // 3. Call OpenAI (ChatKit)
     const response = await fetch('https://api.openai.com/v1/chatkit/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
-        'OpenAI-Beta': 'chatkit_beta=v1' // [cite: 468] Required for ChatKit
+        'OpenAI-Beta': 'chatkit_beta=v1'
       },
-      body: JSON.stringify({
-        workflow: { id: WORKFLOW_ID }, // [cite: 472] Connects to your specific agent
-        // user: "user-unique-id" // Optional: Pass a user ID if you want to track users
-      }),
+      body: JSON.stringify({ workflow: { id: WORKFLOW_ID } }),
     });
 
+    // 4. IF IT FAILS: Print the EXACT error message to the screen
     if (!response.ok) {
         const errorText = await response.text();
-        console.error("OpenAI API Error:", errorText);
-        return res.status(response.status).json({ error: 'Failed to fetch token from OpenAI' });
+        return res.status(response.status).json({ 
+            status: "OpenAI Rejected Request",
+            sent_workflow_id: WORKFLOW_ID, // Verify the ID being sent
+            openai_error: errorText // <--- THIS IS WHAT WE NEED
+        });
     }
 
     const data = await response.json();
-    // Return the client_secret to the frontend
     res.status(200).json(data);
 
   } catch (error) {
-    console.error('Server Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: error.message });
   }
 }
