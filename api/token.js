@@ -1,15 +1,13 @@
 // FILENAME: api/token.js
-// This is a "Serverless Function" ready for Vercel.
-
 export default async function handler(req, res) {
-  // 1. Get the API Key
+  // 1. Get the API Key from Vercel Environment Variables
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
   if (!OPENAI_API_KEY) {
     return res.status(500).json({ error: 'Server Error: Missing API Key' });
   }
 
-  // 2. Handle CORS (Allow your website)
+  // 2. Handle CORS (Allow your WordPress site)
   const allowedOrigins = [
     'https://grandcafedelaposte.restaurant', 
     'https://www.grandcafedelaposte.restaurant',
@@ -20,6 +18,7 @@ export default async function handler(req, res) {
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
+    // Optional: allow all for testing, but restrict for production
     res.setHeader('Access-Control-Allow-Origin', '*'); 
   }
   
@@ -30,42 +29,23 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // 3. THE BRAIN (Instructions for the Agent)
-  // This tells the AI who it is and how to behave.
-  const SYSTEM_INSTRUCTIONS = `
-    You are the "Grand Café Concierge," a digital Maître d' for Grand Café de la Poste in Marrakech.
-    Tone: Welcoming, Sophisticated, French-Moroccan Hospitality.
-    Languages: French (primary), English (if user speaks it).
-    
-    KEY KNOWLEDGE:
-    - History: Built 1920 (former Post Office), renovated 2005 by Studio KO. Located in Guéliz.
-    - Atmosphere: Colonial chic, Brasserie (downstairs), Intimate Salon/Live Music (upstairs).
-    - Cuisine: French Brasserie with Moroccan accents (Oysters from Oualidia, Beef Filet).
-    - Music: Live Band (Jazz/Soul) in the evenings.
-    
-    ACTIONS:
-    - If user asks to book/reserve: Trigger "get_reservation_link".
-    - If user asks about Soul/Jazz night specifically: Trigger "get_music_reservation".
-    - If user asks for private events/groups: Trigger "contact_events_team".
-    
-    RULES:
-    - Be concise but warm ("Avec plaisir", "Bienvenue").
-    - Never invent menu items.
-    - Direct specific booking queries to the buttons provided in the UI.
-  `;
+  // 3. Connect to Agent Builder (ChatKit)
+  // We need your Workflow ID here. 
+  // You can hardcode it below OR add it to Vercel Env Vars as WORKFLOW_ID.
+  const WORKFLOW_ID = process.env.WORKFLOW_ID || "wf_REPLACE_WITH_YOUR_ID"; 
 
-  // 4. The Logic: Call OpenAI to get a Session Token
   try {
-    const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
+    // [cite: 464, 468] Using the ChatKit session endpoint
+    const response = await fetch('https://api.openai.com/v1/chatkit/sessions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
+        'OpenAI-Beta': 'chatkit_beta=v1' // [cite: 468] Required for ChatKit
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2024-10-01",
-        voice: "alloy",
-        instructions: SYSTEM_INSTRUCTIONS, // <--- CRITICAL ADDITION
+        workflow: { id: WORKFLOW_ID }, // [cite: 472] Connects to your specific agent
+        // user: "user-unique-id" // Optional: Pass a user ID if you want to track users
       }),
     });
 
@@ -76,6 +56,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    // Return the client_secret to the frontend
     res.status(200).json(data);
 
   } catch (error) {
