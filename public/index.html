@@ -18,16 +18,16 @@
             flex-direction: column;
         }
 
-        /* 2. CUSTOM HEADER (The "Crown") */
+        /* 2. CUSTOM HEADER */
         .custom-header {
             flex: 0 0 65px; 
             background-color: #FEF9EE;
-            border-bottom: 1px solid #978550; /* Gold Line */
+            border-bottom: 1px solid #978550; 
             display: flex;
             align-items: center;
             padding: 0 15px;
             z-index: 20;
-            box-shadow: 0 4px 12px rgba(151, 133, 80, 0.15); /* Soft Gold Shadow */
+            box-shadow: 0 4px 12px rgba(151, 133, 80, 0.15); 
         }
         
         .header-logo { height: 45px; width: auto; margin-right: 12px; }
@@ -46,11 +46,11 @@
             background: #FEF9EE;
         }
 
-        /* 4. WELCOME CURTAIN (The French Greeting) */
+        /* 4. WELCOME CURTAIN */
         #welcome-curtain {
             position: absolute;
             top: 0; left: 0; width: 100%; 
-            bottom: 90px; /* Leave space for the input bar */
+            bottom: 90px; /* Input visible below */
             background-color: #FEF9EE;
             display: flex;
             flex-direction: column;
@@ -59,7 +59,8 @@
             z-index: 15; 
             text-align: center;
             padding: 40px;
-            pointer-events: none; 
+            pointer-events: none; /* Let clicks pass to input */
+            transition: opacity 0.3s ease; /* Smooth fade */
         }
         
         .welcome-text {
@@ -76,20 +77,19 @@
             line-height: 1.6;
         }
 
-        /* 5. CHAT STYLING (The "Frame") */
-        /* We can't change the input box color, but we CAN frame it in Beige */
+        /* 5. CHAT STYLING */
         openai-chatkit { 
             width: 100%; height: 100%; 
             --ck-body-background: #FEF9EE;
             --ck-background: #FEF9EE;
             
-            /* Bubbles: Gold for User, White for Sam */
+            /* Bubbles */
             --ck-message-user-background: #978550;
             --ck-message-user-text-color: #ffffff;
             --ck-message-assistant-background: #ffffff;
             --ck-message-assistant-text-color: #5a5a5a;
             
-            /* Hide the default header since we have our custom one */
+            /* Header Removed */
             --ck-header-height: 0px; 
         }
 
@@ -100,7 +100,7 @@
 <body>
     <div class="custom-header">
         <img src="https://www.grandcafedelaposte.restaurant/grandcafedelapos/wp-content/uploads/2025/12/GCDLP_Logo_Icons_Tete_Noire_Right-1-e1769096955816.png" class="header-logo" alt="Logo">
-        <span class="header-title">Concierge</span>
+        <span class="header-title">Votre Concierge Digital</span>
     </div>
 
     <div id="chat-wrapper">
@@ -128,19 +128,14 @@
                             return data.client_secret;
                         }
                     },
-                    // Clean, light theme
                     theme: 'light',
                 });
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // Keep the input text cleaner
+                // Start the Watchdogs
+                monitorChatActivity(chat);
                 cleanInput(chat);
-
-                // Interactions to hide curtain
-                document.addEventListener('click', hideCurtain);
-                document.addEventListener('keydown', hideCurtain);
-                chat.addEventListener('message', hideCurtain);
 
             } catch (err) {
                 console.error(err);
@@ -148,23 +143,51 @@
         }
 
         function hideCurtain() {
-            if (curtain.style.opacity !== '0') {
-                curtain.style.transition = "opacity 0.5s ease";
+            if (curtain && curtain.style.display !== 'none') {
                 curtain.style.opacity = '0';
-                setTimeout(() => { curtain.style.display = 'none'; }, 500);
+                setTimeout(() => { curtain.style.display = 'none'; }, 300);
             }
         }
 
+        // --- NEW WATCHDOG SCRIPT ---
+        function monitorChatActivity(chatElement) {
+            // Check every 200ms
+            const monitor = setInterval(() => {
+                const shadow = chatElement.shadowRoot;
+                if (!shadow) return;
+
+                // 1. CHECK FOR MESSAGES
+                // As soon as a message bubble appears (class usually starts with .ck-message), HIDE CURTAIN
+                const messages = shadow.querySelectorAll('div[class*="message"], div[class*="bubble"]');
+                if (messages.length > 0) {
+                    hideCurtain();
+                    // Once hidden, we can stop checking
+                    clearInterval(monitor);
+                }
+
+                // 2. CHECK FOR LOADING SPINNER
+                // If Sam is thinking, also hide curtain
+                const loading = shadow.querySelector('div[class*="loading"]');
+                if (loading) hideCurtain();
+
+            }, 200);
+            
+            // Interaction Backup: If user clicks inside chat, hide it
+            chatElement.addEventListener('click', hideCurtain);
+            chatElement.addEventListener('keydown', hideCurtain);
+        }
+
         function cleanInput(chatElement) {
-            // Simple placeholder cleaner
             const cleaner = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
                 const inputs = shadow.querySelectorAll('textarea, input');
                 inputs.forEach(input => {
-                    // Try to force French placeholder
                     if (input.placeholder && input.placeholder.includes("Message")) {
                         input.placeholder = "Écrivez votre message...";
+                        
+                        // Extra trigger: If user focuses input, hide curtain
+                        input.addEventListener('focus', hideCurtain);
                     }
                 });
             }, 500); 
