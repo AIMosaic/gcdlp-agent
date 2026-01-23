@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
     <title>Grand Café Concierge</title>
-    <!-- Load ChatKit -->
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
         /* 1. LAYOUT & RESET */
@@ -47,13 +46,10 @@
             background: #FEF9EE;
         }
 
-        /* 4. THE WELCOME CURTAIN */
+        /* 4. WELCOME CURTAIN */
         #welcome-curtain {
             position: absolute;
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            bottom: 90px; 
+            top: 0; left: 0; width: 100%; bottom: 90px; 
             background-color: #FEF9EE;
             display: flex;
             flex-direction: column;
@@ -79,64 +75,34 @@
             line-height: 1.5;
         }
 
-        /* 5. CHAT STYLING - FULL BEIGE OVERRIDE */
+        /* 5. CHAT STYLING (The Outer Layer) */
         openai-chatkit { 
             width: 100%; height: 100%; 
-            
-            /* -- BACKGROUNDS (ALL BEIGE) -- */
             --ck-body-background: #FEF9EE;
             --ck-background: #FEF9EE;
-            --ck-composer-background: #FEF9EE; /* The area behind the input box */
-            
-            /* -- BUBBLES -- */
-            /* User (Right): Gold Bubble, Beige Text */
+            /* Bubbles */
             --ck-message-user-background: #978550;
-            --ck-message-user-text-color: #FEF9EE;
-            
-            /* Sam (Left): Beige Bubble, Dark Text, Gold Border */
+            --ck-message-user-text-color: #ffffff;
             --ck-message-assistant-background: #FEF9EE;
             --ck-message-assistant-text-color: #5a5a5a;
             --ck-message-assistant-border: 1px solid #978550;
-            
-            /* -- INPUT BOX -- */
-            /* Force Input Box to be Beige with Gold Border */
-            --ck-input-background: #FEF9EE; 
-            --ck-input-border: 1px solid #978550; 
-            --ck-input-text-color: #5a5a5a;
-            
-            /* -- SEND BUTTON (The Arrow) -- */
-            /* Circle is Gold, Arrow Icon is Beige */
-            --ck-button-primary-background: #978550;
-            --ck-button-primary-color: #FEF9EE; 
-            --ck-button-primary-hover-background: #7a6a3d;
-            
-            /* -- GENERAL -- */
-            --ck-border-radius: 8px;
-            --ck-font-family: 'Helvetica Neue', Helvetica, sans-serif;
-            --ck-secondary-text: #978550; /* Time stamps etc */
         }
 
-        /* Hides Vercel Toolbar */
+        /* Hide Vercel Toolbar */
         vercel-live-feedback { display: none !important; }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
     <div class="custom-header">
         <img src="https://www.grandcafedelaposte.restaurant/grandcafedelapos/wp-content/uploads/2025/12/GCDLP_Logo_Icons_Tete_Noire_Right-1-e1769096955816.png" class="header-logo" alt="Logo">
         <span class="header-title">Concierge</span>
     </div>
 
-    <!-- CHAT AREA -->
     <div id="chat-wrapper">
-        
-        <!-- THE WELCOME CURTAIN -->
         <div id="welcome-curtain">
             <div class="welcome-text">Bienvenue au<br>Grand Café de la Poste</div>
             <div class="welcome-sub">Je suis votre concierge digital.<br>Comment puis-je vous aider aujourd'hui ?</div>
         </div>
-
-        <!-- The Actual Chat -->
         <div id="chat-mount" style="width:100%; height:100%"></div>
     </div>
 
@@ -162,10 +128,9 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // 1. Clear the Input Text
-                emptyInputPlaceholder(chat);
+                // START THE "TROJAN HORSE" INJECTOR
+                injectStylesAndCleanInput(chat);
 
-                // 2. Setup Curtain Logic
                 document.addEventListener('click', hideCurtain);
                 document.addEventListener('keydown', hideCurtain);
                 chat.addEventListener('message', hideCurtain);
@@ -183,23 +148,57 @@
             }
         }
 
-        function emptyInputPlaceholder(chatElement) {
-            // Check repeatedly to find the input box and clear the placeholder
-            const clearer = setInterval(() => {
+        function injectStylesAndCleanInput(chatElement) {
+            // Run this repeatedly to make sure we catch the element when it loads
+            const injector = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
+                // 1. INJECT CUSTOM CSS FOR COLORS (The Trojan Horse)
+                // We create a new <style> tag inside the shadow DOM
+                if (!shadow.getElementById('grand-cafe-overrides')) {
+                    const style = document.createElement('style');
+                    style.id = 'grand-cafe-overrides';
+                    style.innerHTML = `
+                        /* FORCE BEIGE INPUT BACKGROUND */
+                        textarea, input[type="text"] {
+                            background-color: #FEF9EE !important;
+                            border: 1px solid #978550 !important;
+                            color: #5a5a5a !important;
+                        }
+                        
+                        /* FORCE BEIGE BEHIND INPUT */
+                        div[class*="composer"], form {
+                            background-color: #FEF9EE !important;
+                        }
+
+                        /* FORCE GOLD BUTTON */
+                        button[type="submit"], button[aria-label="Send message"] {
+                            background-color: #978550 !important;
+                            color: #FEF9EE !important;
+                            border-radius: 50% !important;
+                        }
+                        
+                        /* FORCE BUTTON ICON TO BE BEIGE */
+                        button[type="submit"] svg, button[aria-label="Send message"] svg {
+                            color: #FEF9EE !important;
+                            fill: #FEF9EE !important;
+                        }
+                    `;
+                    shadow.appendChild(style);
+                }
+
+                // 2. CLEAN THE INPUT TEXT
                 const inputs = shadow.querySelectorAll('textarea, input');
                 inputs.forEach(input => {
-                    // Force placeholder to be empty
                     if (input.placeholder && input.placeholder !== "") {
                         input.placeholder = "";
                     }
                 });
             }, 500); 
             
-            // Stop checking after 10 seconds
-            setTimeout(() => clearInterval(clearer), 10000);
+            // Stop after 10 seconds
+            setTimeout(() => clearInterval(injector), 10000);
         }
         
         init();
