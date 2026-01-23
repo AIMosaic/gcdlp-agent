@@ -13,14 +13,14 @@
             height: 100%; width: 100%; 
             background-color: #FEF9EE; 
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            overflow: hidden; /* No double scrollbars */
+            overflow: hidden; 
             display: flex;
-            flex-direction: column; /* Stack items vertically */
+            flex-direction: column;
         }
 
-        /* 2. CUSTOM GOLD HEADER */
+        /* 2. CUSTOM HEADER */
         .custom-header {
-            flex: 0 0 65px; /* Fixed height: 65px */
+            flex: 0 0 65px; 
             background-color: #FEF9EE;
             border-bottom: 1px solid #978550;
             display: flex;
@@ -39,36 +39,41 @@
             text-transform: uppercase;
         }
 
-        /* 3. CHAT CONTAINER */
-        /* This fills all remaining space below the header */
+        /* 3. CHAT WRAPPER */
         #chat-wrapper {
             flex: 1; 
             position: relative;
             background: #FEF9EE;
         }
 
-        /* 4. CHAT COMPONENT STYLING */
+        /* 4. CHAT STYLING */
         openai-chatkit { 
-            width: 100%; 
-            height: 100%; 
+            width: 100%; height: 100%; 
             
-            /* --- COLOR PALETTE --- */
+            /* -- COLORS -- */
             --ck-body-background: #FEF9EE;
+            --ck-background: #FEF9EE;
+            --ck-primary-text: #5a5a5a;
+            --ck-secondary-text: #978550; 
             
-            /* User Bubble (GOLD) */
+            /* Bubbles */
             --ck-message-user-background: #978550;
             --ck-message-user-text-color: #ffffff;
-            
-            /* Sam's Bubble (WHITE) */
             --ck-message-assistant-background: #ffffff;
             --ck-message-assistant-text-color: #5a5a5a;
+            --ck-message-assistant-border: 1px solid #978550;
             
-            /* Input Area */
-            --ck-input-background: #ffffff;
+            /* Input */
+            --ck-input-background: #ffffff; 
+            --ck-input-border: 1px solid #978550; 
+            --ck-button-primary-background: #978550;
+            --ck-button-primary-hover-background: #7a6a3d;
+            
             --ck-border-radius: 8px;
+            --ck-font-family: 'Helvetica Neue', Helvetica, sans-serif;
         }
 
-        /* Hide Vercel Toolbar */
+        /* Hides Vercel Toolbar */
         vercel-live-feedback { display: none !important; }
     </style>
 </head>
@@ -85,13 +90,9 @@
 
         async function init() {
             try {
-                // 1. Wait for Library
                 await customElements.whenDefined('openai-chatkit');
-                
-                // 2. Create Component
                 const chat = document.createElement('openai-chatkit');
                 
-                // 3. Configure (SAFE MODE: No 'header: false')
                 chat.setOptions({
                     api: {
                         getClientSecret: async () => {
@@ -103,13 +104,43 @@
                     theme: 'light'
                 });
 
-                // 4. Inject into the Wrapper (Not Body)
                 document.getElementById('chat-wrapper').appendChild(chat);
-                console.log("Chat loaded into wrapper.");
+                
+                // --- THE TRANSLATOR SCRIPT ---
+                // This waits for the chat to render, then forces French text.
+                translateInterface(chat);
 
             } catch (err) {
-                document.body.innerHTML += `<div style="color:red; padding:20px;">Error: ${err.message}</div>`;
+                console.error(err);
             }
+        }
+
+        function translateInterface(chatElement) {
+            // We use a "MutationObserver" to watch for the text box appearing
+            const observer = new MutationObserver(() => {
+                // 1. Access the Shadow DOM (The secret area inside the chat)
+                const shadow = chatElement.shadowRoot;
+                if (!shadow) return;
+
+                // 2. Change INPUT Placeholder ("Message the AI")
+                const input = shadow.querySelector('textarea, input[type="text"]');
+                if (input && !input.dataset.translated) {
+                    input.placeholder = "Dites-moi comment je peux vous aider...";
+                    input.dataset.translated = "true"; // Mark as done
+                }
+                
+                // 3. Change WELCOME MESSAGE ("What can I help with?")
+                // We look for the large heading usually found in empty states
+                const headings = shadow.querySelectorAll('h2, h3, div[class*="title"]');
+                headings.forEach(h => {
+                    if (h.innerText.includes("What can I help") || h.innerText.includes("help with today")) {
+                        h.innerText = "Bienvenue au Grand Café de la Poste !";
+                    }
+                });
+            });
+
+            // Start watching the chat element for changes
+            observer.observe(chatElement, { childList: true, subtree: true });
         }
         
         init();
