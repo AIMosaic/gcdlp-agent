@@ -18,16 +18,16 @@
             flex-direction: column;
         }
 
-        /* 2. CUSTOM HEADER */
+        /* 2. CUSTOM HEADER (The "Crown") */
         .custom-header {
             flex: 0 0 65px; 
             background-color: #FEF9EE;
-            border-bottom: 1px solid #978550;
+            border-bottom: 1px solid #978550; /* Gold Line */
             display: flex;
             align-items: center;
             padding: 0 15px;
             z-index: 20;
-            box-shadow: 0 2px 10px rgba(151, 133, 80, 0.1);
+            box-shadow: 0 4px 12px rgba(151, 133, 80, 0.15); /* Soft Gold Shadow */
         }
         
         .header-logo { height: 45px; width: auto; margin-right: 12px; }
@@ -46,10 +46,11 @@
             background: #FEF9EE;
         }
 
-        /* 4. WELCOME CURTAIN */
+        /* 4. WELCOME CURTAIN (The French Greeting) */
         #welcome-curtain {
             position: absolute;
-            top: 0; left: 0; width: 100%; bottom: 90px; 
+            top: 0; left: 0; width: 100%; 
+            bottom: 90px; /* Leave space for the input bar */
             background-color: #FEF9EE;
             display: flex;
             flex-direction: column;
@@ -63,7 +64,7 @@
         
         .welcome-text {
             color: #978550;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 300;
             margin-bottom: 15px;
             font-family: "Garamond", serif; 
@@ -71,20 +72,25 @@
         
         .welcome-sub {
             color: #5a5a5a;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
-        /* 5. CHAT STYLING (Outer Layer) */
+        /* 5. CHAT STYLING (The "Frame") */
+        /* We can't change the input box color, but we CAN frame it in Beige */
         openai-chatkit { 
             width: 100%; height: 100%; 
             --ck-body-background: #FEF9EE;
             --ck-background: #FEF9EE;
+            
+            /* Bubbles: Gold for User, White for Sam */
             --ck-message-user-background: #978550;
             --ck-message-user-text-color: #ffffff;
-            --ck-message-assistant-background: #FEF9EE;
+            --ck-message-assistant-background: #ffffff;
             --ck-message-assistant-text-color: #5a5a5a;
-            --ck-message-assistant-border: 1px solid #978550;
+            
+            /* Hide the default header since we have our custom one */
+            --ck-header-height: 0px; 
         }
 
         /* Hide Vercel Toolbar */
@@ -122,14 +128,16 @@
                             return data.client_secret;
                         }
                     },
-                    theme: 'light'
+                    // Clean, light theme
+                    theme: 'light',
                 });
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // START THE DIRECT PAINT SCRIPT
-                forcePaintStyles(chat);
+                // Keep the input text cleaner
+                cleanInput(chat);
 
+                // Interactions to hide curtain
                 document.addEventListener('click', hideCurtain);
                 document.addEventListener('keydown', hideCurtain);
                 chat.addEventListener('message', hideCurtain);
@@ -147,54 +155,20 @@
             }
         }
 
-        function forcePaintStyles(chatElement) {
-            // "NUCLEAR" OPTION: DIRECTLY PAINTING THE ELEMENTS VIA JS
-            // This runs every 100ms to instantly overwrite any default colors
-            const painter = setInterval(() => {
+        function cleanInput(chatElement) {
+            // Simple placeholder cleaner
+            const cleaner = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
-
-                // 1. FORCE INPUT BOX (Beige Background, Gold Border)
-                const inputs = shadow.querySelectorAll('textarea, input, .ck-composer');
-                inputs.forEach(el => {
-                    el.style.setProperty('background-color', '#FEF9EE', 'important');
-                    el.style.setProperty('border', '1px solid #978550', 'important');
-                    el.style.setProperty('color', '#5a5a5a', 'important');
-                    // Clear Placeholder
-                    if (el.placeholder && el.placeholder !== "") el.placeholder = "";
-                });
-                
-                // 2. FORCE WRAPPERS (The white box behind the input)
-                const wrappers = shadow.querySelectorAll('form, div[class*="composer"], div[class*="input"]');
-                wrappers.forEach(el => {
-                    // We only want to paint the bottom bar, not the whole chat bubbles area
-                    // Usually the bottom bar is a form or has 'composer' in the class
-                    if(el.tagName === 'FORM' || el.className.includes('composer')) {
-                         el.style.setProperty('background-color', '#FEF9EE', 'important');
+                const inputs = shadow.querySelectorAll('textarea, input');
+                inputs.forEach(input => {
+                    // Try to force French placeholder
+                    if (input.placeholder && input.placeholder.includes("Message")) {
+                        input.placeholder = "Écrivez votre message...";
                     }
                 });
-
-                // 3. FORCE SEND BUTTON (Gold Circle, Beige Arrow)
-                const buttons = shadow.querySelectorAll('button');
-                buttons.forEach(btn => {
-                    // Identify the send button (usually type=submit or has an SVG)
-                    if (btn.querySelector('svg') || btn.type === 'submit') {
-                        btn.style.setProperty('background-color', '#978550', 'important');
-                        btn.style.setProperty('border-radius', '50%', 'important');
-                        
-                        // Force the SVG icon inside to be Beige
-                        const svg = btn.querySelector('svg');
-                        if (svg) {
-                            svg.style.setProperty('color', '#FEF9EE', 'important');
-                            svg.style.setProperty('fill', '#FEF9EE', 'important');
-                        }
-                    }
-                });
-
-            }, 100); // Check 10 times a second
-            
-            // Keep doing this for 20 seconds to ensure it sticks during loading
-            setTimeout(() => clearInterval(painter), 20000);
+            }, 500); 
+            setTimeout(() => clearInterval(cleaner), 5000);
         }
         
         init();
