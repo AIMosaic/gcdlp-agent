@@ -6,88 +6,92 @@
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        /* 1. LAYOUT & FONTS */
+        /* 1. LAYOUT RESET */
         * { box-sizing: border-box; }
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
             background-color: #FEF9EE; 
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            overflow: hidden; 
+            overflow: hidden; /* No double scrollbars */
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
         }
 
-        /* 2. CUSTOM HEADER (We build this ourselves for total control) */
+        /* 2. CUSTOM GOLD HEADER */
         .custom-header {
-            height: 60px;
+            flex: 0 0 65px; /* Fixed height: 65px */
             background-color: #FEF9EE;
             border-bottom: 1px solid #978550;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            position: relative;
+            padding: 0 15px;
             z-index: 20;
+            box-shadow: 0 2px 10px rgba(151, 133, 80, 0.1);
         }
         
+        .header-logo { height: 45px; width: auto; margin-right: 12px; }
         .header-title {
             color: #978550;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        /* 3. CHAT COMPONENT STYLING */
+        /* 3. CHAT CONTAINER */
+        /* This fills all remaining space below the header */
+        #chat-wrapper {
+            flex: 1; 
+            position: relative;
+            background: #FEF9EE;
+        }
+
+        /* 4. CHAT COMPONENT STYLING */
         openai-chatkit { 
-            display: block;
-            position: absolute;
-            top: 60px; /* Pushed down by our custom header */
-            left: 0;
             width: 100%; 
-            height: calc(100% - 60px); /* Fill remaining space */
-            z-index: 10;
+            height: 100%; 
             
-            /* --- THE GRAND CAFE PALETTE --- */
-            
-            /* Backgrounds */
+            /* --- COLOR PALETTE --- */
             --ck-body-background: #FEF9EE;
             
-            /* User Bubble (Gold) */
+            /* User Bubble (GOLD) */
             --ck-message-user-background: #978550;
             --ck-message-user-text-color: #ffffff;
             
-            /* Assistant Bubble (White/Beige) */
+            /* Sam's Bubble (WHITE) */
             --ck-message-assistant-background: #ffffff;
             --ck-message-assistant-text-color: #5a5a5a;
             
-            /* Inputs & Buttons */
+            /* Input Area */
             --ck-input-background: #ffffff;
-            --ck-input-border-color: #dcdcdc;
-            --ck-button-primary-background: #978550;
-            --ck-button-primary-hover-background: #7a6a3d;
-            
-            /* General */
-            --ck-border-radius: 4px; /* Classic, not too round */
-            --ck-font-family: 'Helvetica Neue', Helvetica, sans-serif;
+            --ck-border-radius: 8px;
         }
 
-        /* Hide Vercel Elements */
+        /* Hide Vercel Toolbar */
         vercel-live-feedback { display: none !important; }
     </style>
 </head>
 <body>
     <div class="custom-header">
-        <span class="header-title">Grand Café Concierge</span>
+        <img src="https://www.grandcafedelaposte.restaurant/grandcafedelapos/wp-content/uploads/2025/12/GCDLP_Logo_Icons_Tete_Noire_Right-1-e1769096955816.png" class="header-logo" alt="Logo">
+        <span class="header-title">Concierge</span>
     </div>
+
+    <div id="chat-wrapper"></div>
 
     <script>
         const TOKEN_URL = "/api/token"; 
 
         async function init() {
             try {
+                // 1. Wait for Library
                 await customElements.whenDefined('openai-chatkit');
+                
+                // 2. Create Component
                 const chat = document.createElement('openai-chatkit');
                 
+                // 3. Configure (SAFE MODE: No 'header: false')
                 chat.setOptions({
                     api: {
                         getClientSecret: async () => {
@@ -96,14 +100,15 @@
                             return data.client_secret;
                         }
                     },
-                    // We remove the default header since we built our own
-                    header: false 
+                    theme: 'light'
                 });
 
-                document.body.appendChild(chat);
+                // 4. Inject into the Wrapper (Not Body)
+                document.getElementById('chat-wrapper').appendChild(chat);
+                console.log("Chat loaded into wrapper.");
 
             } catch (err) {
-                console.error("Chat Error:", err);
+                document.body.innerHTML += `<div style="color:red; padding:20px;">Error: ${err.message}</div>`;
             }
         }
         
