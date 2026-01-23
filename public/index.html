@@ -6,7 +6,7 @@
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        /* 1. LAYOUT RESET */
+        /* 1. LAYOUT & RESET */
         * { box-sizing: border-box; }
         body, html { 
             margin: 0; padding: 0; 
@@ -46,15 +46,43 @@
             background: #FEF9EE;
         }
 
-        /* 4. CHAT STYLING */
+        /* 4. THE WELCOME OVERLAY (The "Curtain") */
+        /* This sits ON TOP of the empty English chat to hide it */
+        #welcome-curtain {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #FEF9EE;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15; /* Above ChatKit (until clicked) */
+            text-align: center;
+            padding: 40px;
+            pointer-events: none; /* Let clicks pass through to the chat input */
+        }
+        
+        .welcome-text {
+            color: #978550;
+            font-size: 22px;
+            font-weight: 300;
+            margin-bottom: 15px;
+            font-family: "Garamond", serif; /* More elegant font */
+        }
+        
+        .welcome-sub {
+            color: #5a5a5a;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 5. CHAT STYLING */
         openai-chatkit { 
             width: 100%; height: 100%; 
             
             /* -- COLORS -- */
             --ck-body-background: #FEF9EE;
             --ck-background: #FEF9EE;
-            --ck-primary-text: #5a5a5a;
-            --ck-secondary-text: #978550; 
             
             /* Bubbles */
             --ck-message-user-background: #978550;
@@ -70,10 +98,9 @@
             --ck-button-primary-hover-background: #7a6a3d;
             
             --ck-border-radius: 8px;
-            --ck-font-family: 'Helvetica Neue', Helvetica, sans-serif;
         }
 
-        /* Hides Vercel Toolbar */
+        /* Hide Vercel Toolbar */
         vercel-live-feedback { display: none !important; }
     </style>
 </head>
@@ -83,10 +110,19 @@
         <span class="header-title">Concierge</span>
     </div>
 
-    <div id="chat-wrapper"></div>
+    <div id="chat-wrapper">
+        
+        <div id="welcome-curtain">
+            <div class="welcome-text">Bienvenue au<br>Grand Café de la Poste</div>
+            <div class="welcome-sub">Je suis votre concierge digital.<br>Comment puis-je vous aider aujourd'hui ?</div>
+        </div>
+
+        <div id="chat-mount" style="width:100%; height:100%"></div>
+    </div>
 
     <script>
         const TOKEN_URL = "/api/token"; 
+        const curtain = document.getElementById('welcome-curtain');
 
         async function init() {
             try {
@@ -104,43 +140,50 @@
                     theme: 'light'
                 });
 
-                document.getElementById('chat-wrapper').appendChild(chat);
+                document.getElementById('chat-mount').appendChild(chat);
                 
-                // --- THE TRANSLATOR SCRIPT ---
-                // This waits for the chat to render, then forces French text.
-                translateInterface(chat);
+                // 1. Activate the Translator for the Input Box
+                translateInputBox(chat);
+
+                // 2. Setup the Curtain Logic
+                // When the user clicks anywhere or starts typing, fade out the welcome message
+                document.addEventListener('click', hideCurtain);
+                document.addEventListener('keydown', hideCurtain);
+
+                // Also listen for messages (if Sam replies, hide curtain)
+                chat.addEventListener('message', hideCurtain);
 
             } catch (err) {
                 console.error(err);
             }
         }
 
-        function translateInterface(chatElement) {
-            // We use a "MutationObserver" to watch for the text box appearing
-            const observer = new MutationObserver(() => {
-                // 1. Access the Shadow DOM (The secret area inside the chat)
+        function hideCurtain() {
+            if (curtain.style.opacity !== '0') {
+                curtain.style.transition = "opacity 0.5s ease";
+                curtain.style.opacity = '0';
+                // Remove it from the DOM after fade out so it doesn't block clicks
+                setTimeout(() => { curtain.style.display = 'none'; }, 500);
+            }
+        }
+
+        function translateInputBox(chatElement) {
+            // "Brute Force" Interval: Check every 500ms for the input box
+            const translator = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
-                // 2. Change INPUT Placeholder ("Message the AI")
-                const input = shadow.querySelector('textarea, input[type="text"]');
-                if (input && !input.dataset.translated) {
-                    input.placeholder = "Dites-moi comment je peux vous aider...";
-                    input.dataset.translated = "true"; // Mark as done
-                }
-                
-                // 3. Change WELCOME MESSAGE ("What can I help with?")
-                // We look for the large heading usually found in empty states
-                const headings = shadow.querySelectorAll('h2, h3, div[class*="title"]');
-                headings.forEach(h => {
-                    if (h.innerText.includes("What can I help") || h.innerText.includes("help with today")) {
-                        h.innerText = "Bienvenue au Grand Café de la Poste !";
+                const inputs = shadow.querySelectorAll('textarea, input');
+                inputs.forEach(input => {
+                    // Check if it's still English
+                    if (input.placeholder && input.placeholder.includes("Message")) {
+                        input.placeholder = "Dites-nous ce que vous désirez...";
                     }
                 });
-            });
+            }, 500); 
 
-            // Start watching the chat element for changes
-            observer.observe(chatElement, { childList: true, subtree: true });
+            // Stop checking after 10 seconds to save battery
+            setTimeout(() => clearInterval(translator), 10000);
         }
         
         init();
