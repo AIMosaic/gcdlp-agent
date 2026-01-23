@@ -6,36 +6,80 @@
     <title>Grand Café Concierge</title>
     <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"></script>
     <style>
-        /* 1. LAYOUT RESET */
+        /* 1. LAYOUT & FONTS */
         * { box-sizing: border-box; }
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
             background-color: #FEF9EE; 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             overflow: hidden; 
         }
 
-        /* 2. COMPONENT STYLING (The Correct Way) */
+        /* 2. CUSTOM HEADER (We build this ourselves for total control) */
+        .custom-header {
+            height: 60px;
+            background-color: #FEF9EE;
+            border-bottom: 1px solid #978550;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 20;
+        }
+        
+        .header-title {
+            color: #978550;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* 3. CHAT COMPONENT STYLING */
         openai-chatkit { 
             display: block;
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 60px; /* Pushed down by our custom header */
+            left: 0;
+            width: 100%; 
+            height: calc(100% - 60px); /* Fill remaining space */
             z-index: 10;
             
-            /* WE SET COLORS HERE NOW, NOT IN JS */
+            /* --- THE GRAND CAFE PALETTE --- */
+            
+            /* Backgrounds */
             --ck-body-background: #FEF9EE;
+            
+            /* User Bubble (Gold) */
             --ck-message-user-background: #978550;
-            --ck-primary-text: #978550;
-            --ck-secondary-text: #5a5a5a;
-            --ck-border-radius: 8px;
+            --ck-message-user-text-color: #ffffff;
+            
+            /* Assistant Bubble (White/Beige) */
+            --ck-message-assistant-background: #ffffff;
+            --ck-message-assistant-text-color: #5a5a5a;
+            
+            /* Inputs & Buttons */
+            --ck-input-background: #ffffff;
+            --ck-input-border-color: #dcdcdc;
+            --ck-button-primary-background: #978550;
+            --ck-button-primary-hover-background: #7a6a3d;
+            
+            /* General */
+            --ck-border-radius: 4px; /* Classic, not too round */
+            --ck-font-family: 'Helvetica Neue', Helvetica, sans-serif;
         }
 
-        /* 3. Hide Toolbar */
+        /* Hide Vercel Elements */
         vercel-live-feedback { display: none !important; }
     </style>
 </head>
 <body>
+    <div class="custom-header">
+        <span class="header-title">Grand Café Concierge</span>
+    </div>
+
     <script>
         const TOKEN_URL = "/api/token"; 
 
@@ -44,8 +88,6 @@
                 await customElements.whenDefined('openai-chatkit');
                 const chat = document.createElement('openai-chatkit');
                 
-                // --- THE FIX: SIMPLIFIED CONFIG ---
-                // We removed 'style' and 'header' to stop the crash.
                 chat.setOptions({
                     api: {
                         getClientSecret: async () => {
@@ -54,15 +96,14 @@
                             return data.client_secret;
                         }
                     },
-                    // We can add 'theme' if supported, but let's keep it safe.
-                    theme: 'light' 
+                    // We remove the default header since we built our own
+                    header: false 
                 });
 
                 document.body.appendChild(chat);
-                console.log("Chat started successfully");
 
             } catch (err) {
-                document.body.innerHTML = `<div style="color:red; padding:20px;">Error: ${err.message}</div>`;
+                console.error("Chat Error:", err);
             }
         }
         
