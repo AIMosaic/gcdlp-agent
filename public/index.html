@@ -46,20 +46,23 @@
             background: #FEF9EE;
         }
 
-        /* 4. THE WELCOME OVERLAY (The "Curtain") */
-        /* This sits ON TOP of the empty English chat to hide it */
+        /* 4. THE WELCOME OVERLAY (The Curtain) */
+        /* FIX: We stop it 90px from the bottom to reveal the input bar */
         #welcome-curtain {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            bottom: 90px; /* <--- THIS REVEALS THE CHAT BOX */
             background-color: #FEF9EE;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 15; /* Above ChatKit (until clicked) */
+            z-index: 15; 
             text-align: center;
             padding: 40px;
-            pointer-events: none; /* Let clicks pass through to the chat input */
+            pointer-events: none; /* Allows clicks to pass through if needed */
         }
         
         .welcome-text {
@@ -67,7 +70,7 @@
             font-size: 22px;
             font-weight: 300;
             margin-bottom: 15px;
-            font-family: "Garamond", serif; /* More elegant font */
+            font-family: "Garamond", serif; 
         }
         
         .welcome-sub {
@@ -142,15 +145,10 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // 1. Activate the Translator for the Input Box
                 translateInputBox(chat);
 
-                // 2. Setup the Curtain Logic
-                // When the user clicks anywhere or starts typing, fade out the welcome message
                 document.addEventListener('click', hideCurtain);
                 document.addEventListener('keydown', hideCurtain);
-
-                // Also listen for messages (if Sam replies, hide curtain)
                 chat.addEventListener('message', hideCurtain);
 
             } catch (err) {
@@ -162,27 +160,22 @@
             if (curtain.style.opacity !== '0') {
                 curtain.style.transition = "opacity 0.5s ease";
                 curtain.style.opacity = '0';
-                // Remove it from the DOM after fade out so it doesn't block clicks
                 setTimeout(() => { curtain.style.display = 'none'; }, 500);
             }
         }
 
         function translateInputBox(chatElement) {
-            // "Brute Force" Interval: Check every 500ms for the input box
             const translator = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
                 const inputs = shadow.querySelectorAll('textarea, input');
                 inputs.forEach(input => {
-                    // Check if it's still English
                     if (input.placeholder && input.placeholder.includes("Message")) {
                         input.placeholder = "Dites-nous ce que vous désirez...";
                     }
                 });
             }, 500); 
-
-            // Stop checking after 10 seconds to save battery
             setTimeout(() => clearInterval(translator), 10000);
         }
         
