@@ -75,12 +75,11 @@
             line-height: 1.5;
         }
 
-        /* 5. CHAT STYLING (The Outer Layer) */
+        /* 5. CHAT STYLING (Outer Layer) */
         openai-chatkit { 
             width: 100%; height: 100%; 
             --ck-body-background: #FEF9EE;
             --ck-background: #FEF9EE;
-            /* Bubbles */
             --ck-message-user-background: #978550;
             --ck-message-user-text-color: #ffffff;
             --ck-message-assistant-background: #FEF9EE;
@@ -128,8 +127,8 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // START THE "TROJAN HORSE" INJECTOR
-                injectStylesAndCleanInput(chat);
+                // START THE DIRECT PAINT SCRIPT
+                forcePaintStyles(chat);
 
                 document.addEventListener('click', hideCurtain);
                 document.addEventListener('keydown', hideCurtain);
@@ -148,57 +147,54 @@
             }
         }
 
-        function injectStylesAndCleanInput(chatElement) {
-            // Run this repeatedly to make sure we catch the element when it loads
-            const injector = setInterval(() => {
+        function forcePaintStyles(chatElement) {
+            // "NUCLEAR" OPTION: DIRECTLY PAINTING THE ELEMENTS VIA JS
+            // This runs every 100ms to instantly overwrite any default colors
+            const painter = setInterval(() => {
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
-                // 1. INJECT CUSTOM CSS FOR COLORS (The Trojan Horse)
-                // We create a new <style> tag inside the shadow DOM
-                if (!shadow.getElementById('grand-cafe-overrides')) {
-                    const style = document.createElement('style');
-                    style.id = 'grand-cafe-overrides';
-                    style.innerHTML = `
-                        /* FORCE BEIGE INPUT BACKGROUND */
-                        textarea, input[type="text"] {
-                            background-color: #FEF9EE !important;
-                            border: 1px solid #978550 !important;
-                            color: #5a5a5a !important;
-                        }
-                        
-                        /* FORCE BEIGE BEHIND INPUT */
-                        div[class*="composer"], form {
-                            background-color: #FEF9EE !important;
-                        }
-
-                        /* FORCE GOLD BUTTON */
-                        button[type="submit"], button[aria-label="Send message"] {
-                            background-color: #978550 !important;
-                            color: #FEF9EE !important;
-                            border-radius: 50% !important;
-                        }
-                        
-                        /* FORCE BUTTON ICON TO BE BEIGE */
-                        button[type="submit"] svg, button[aria-label="Send message"] svg {
-                            color: #FEF9EE !important;
-                            fill: #FEF9EE !important;
-                        }
-                    `;
-                    shadow.appendChild(style);
-                }
-
-                // 2. CLEAN THE INPUT TEXT
-                const inputs = shadow.querySelectorAll('textarea, input');
-                inputs.forEach(input => {
-                    if (input.placeholder && input.placeholder !== "") {
-                        input.placeholder = "";
+                // 1. FORCE INPUT BOX (Beige Background, Gold Border)
+                const inputs = shadow.querySelectorAll('textarea, input, .ck-composer');
+                inputs.forEach(el => {
+                    el.style.setProperty('background-color', '#FEF9EE', 'important');
+                    el.style.setProperty('border', '1px solid #978550', 'important');
+                    el.style.setProperty('color', '#5a5a5a', 'important');
+                    // Clear Placeholder
+                    if (el.placeholder && el.placeholder !== "") el.placeholder = "";
+                });
+                
+                // 2. FORCE WRAPPERS (The white box behind the input)
+                const wrappers = shadow.querySelectorAll('form, div[class*="composer"], div[class*="input"]');
+                wrappers.forEach(el => {
+                    // We only want to paint the bottom bar, not the whole chat bubbles area
+                    // Usually the bottom bar is a form or has 'composer' in the class
+                    if(el.tagName === 'FORM' || el.className.includes('composer')) {
+                         el.style.setProperty('background-color', '#FEF9EE', 'important');
                     }
                 });
-            }, 500); 
+
+                // 3. FORCE SEND BUTTON (Gold Circle, Beige Arrow)
+                const buttons = shadow.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    // Identify the send button (usually type=submit or has an SVG)
+                    if (btn.querySelector('svg') || btn.type === 'submit') {
+                        btn.style.setProperty('background-color', '#978550', 'important');
+                        btn.style.setProperty('border-radius', '50%', 'important');
+                        
+                        // Force the SVG icon inside to be Beige
+                        const svg = btn.querySelector('svg');
+                        if (svg) {
+                            svg.style.setProperty('color', '#FEF9EE', 'important');
+                            svg.style.setProperty('fill', '#FEF9EE', 'important');
+                        }
+                    }
+                });
+
+            }, 100); // Check 10 times a second
             
-            // Stop after 10 seconds
-            setTimeout(() => clearInterval(injector), 10000);
+            // Keep doing this for 20 seconds to ensure it sticks during loading
+            setTimeout(() => clearInterval(painter), 20000);
         }
         
         init();
