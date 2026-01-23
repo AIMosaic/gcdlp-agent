@@ -46,38 +46,7 @@
             background: #FEF9EE;
         }
 
-        /* 4. WELCOME CURTAIN */
-        #welcome-curtain {
-            position: absolute;
-            top: 0; left: 0; width: 100%; 
-            bottom: 90px; /* Input visible below */
-            background-color: #FEF9EE;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 15; 
-            text-align: center;
-            padding: 40px;
-            pointer-events: none; /* Let clicks pass to input */
-            transition: opacity 0.3s ease; /* Smooth fade */
-        }
-        
-        .welcome-text {
-            color: #978550;
-            font-size: 24px;
-            font-weight: 300;
-            margin-bottom: 15px;
-            font-family: "Garamond", serif; 
-        }
-        
-        .welcome-sub {
-            color: #5a5a5a;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        /* 5. CHAT STYLING */
+        /* 4. CHAT STYLING (The Frame) */
         openai-chatkit { 
             width: 100%; height: 100%; 
             --ck-body-background: #FEF9EE;
@@ -89,7 +58,7 @@
             --ck-message-assistant-background: #ffffff;
             --ck-message-assistant-text-color: #5a5a5a;
             
-            /* Header Removed */
+            /* Hide Default Header */
             --ck-header-height: 0px; 
         }
 
@@ -104,16 +73,11 @@
     </div>
 
     <div id="chat-wrapper">
-        <div id="welcome-curtain">
-            <div class="welcome-text">Bienvenue au<br>Grand Café de la Poste</div>
-            <div class="welcome-sub">Je suis votre concierge digital.<br>Comment puis-je vous aider aujourd'hui ?</div>
-        </div>
         <div id="chat-mount" style="width:100%; height:100%"></div>
     </div>
 
     <script>
         const TOKEN_URL = "/api/token"; 
-        const curtain = document.getElementById('welcome-curtain');
 
         async function init() {
             try {
@@ -133,48 +97,12 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // Start the Watchdogs
-                monitorChatActivity(chat);
+                // Optional: Try to clean the placeholder text if possible, but no aggressive painting
                 cleanInput(chat);
 
             } catch (err) {
                 console.error(err);
             }
-        }
-
-        function hideCurtain() {
-            if (curtain && curtain.style.display !== 'none') {
-                curtain.style.opacity = '0';
-                setTimeout(() => { curtain.style.display = 'none'; }, 300);
-            }
-        }
-
-        // --- NEW WATCHDOG SCRIPT ---
-        function monitorChatActivity(chatElement) {
-            // Check every 200ms
-            const monitor = setInterval(() => {
-                const shadow = chatElement.shadowRoot;
-                if (!shadow) return;
-
-                // 1. CHECK FOR MESSAGES
-                // As soon as a message bubble appears (class usually starts with .ck-message), HIDE CURTAIN
-                const messages = shadow.querySelectorAll('div[class*="message"], div[class*="bubble"]');
-                if (messages.length > 0) {
-                    hideCurtain();
-                    // Once hidden, we can stop checking
-                    clearInterval(monitor);
-                }
-
-                // 2. CHECK FOR LOADING SPINNER
-                // If Sam is thinking, also hide curtain
-                const loading = shadow.querySelector('div[class*="loading"]');
-                if (loading) hideCurtain();
-
-            }, 200);
-            
-            // Interaction Backup: If user clicks inside chat, hide it
-            chatElement.addEventListener('click', hideCurtain);
-            chatElement.addEventListener('keydown', hideCurtain);
         }
 
         function cleanInput(chatElement) {
@@ -185,9 +113,6 @@
                 inputs.forEach(input => {
                     if (input.placeholder && input.placeholder.includes("Message")) {
                         input.placeholder = "Écrivez votre message...";
-                        
-                        // Extra trigger: If user focuses input, hide curtain
-                        input.addEventListener('focus', hideCurtain);
                     }
                 });
             }, 500); 
