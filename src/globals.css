@@ -1,4 +1,4 @@
-/* --- 1. TAILWIND DIRECTIVES (CRITICAL) --- */
+/* --- 1. TAILWIND DIRECTIVES --- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,53 +19,56 @@
 }
 
 /* --- 3. Global Resets --- */
-body, html {
+/* CRITICAL: We add #root here to ensure the React container is full height */
+body, html, #root {
   margin: 0;
   padding: 0;
   font-family: 'Gilroy', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
   background-color: #FEF9EE;
-  height: 100%; /* CRITICAL: Ensures the app fills the iframe height */
+  height: 100%; 
+  width: 100%;
+  overflow: hidden; 
 }
 
-/* --- 4. Button Styling (Runalto) --- */
-/* We target the ChatKit button class specifically to override defaults */
+/* --- 4. ChatKit Specific Overrides --- */
+/* Force the input area to be visible and styled */
+[data-element="composer-input"] {
+  font-family: 'Gilroy', sans-serif !important;
+  color: #212326 !important;
+}
+
+/* Hide the default OpenAI branding footer if it appears */
+[data-element="footer"] {
+  display: none !important;
+}
+
+/* --- 5. Button Styling (Runalto) --- */
 [data-element="button"] {
   font-family: 'Runalto', serif !important;
   border: 1px solid #978550 !important;
   border-radius: 5px !important;
   transition: all 0.3s ease-in-out !important;
   cursor: pointer !important;
-  
-  /* Desktop Size (Default) */
-  font-size: 20px !important;
-  
-  /* Normal State */
+  font-size: 20px !important; /* Desktop */
   background-color: #978550 !important;
   color: #FEF9EE !important;
 }
 
-/* Hover State */
 [data-element="button"]:hover {
   background-color: #FEF9EE !important;
   color: #978550 !important;
 }
 
-/* --- 5. Responsive Typography --- */
+/* --- 6. Responsive Typography --- */
 @media (max-width: 1024px) {
-  /* Tablet */
-  [data-element="button"] {
-    font-size: 18px !important;
-  }
+  [data-element="button"] { font-size: 18px !important; }
 }
 
 @media (max-width: 768px) {
-  /* Mobile */
-  [data-element="button"] {
-    font-size: 16px !important;
-  }
+  [data-element="button"] { font-size: 16px !important; }
 }
 
-/* --- 6. Custom Header Styling --- */
+/* --- 7. Custom Header Styling --- */
 .custom-header {
   background-color: #FEF9EE;
   border-bottom: 1px solid #978550;
@@ -75,7 +78,6 @@ body, html {
   box-shadow: 0 4px 12px rgba(151, 133, 80, 0.15);
 }
 
-/* Runalto for the Header Title */
 .header-title {
   color: #978550;
   font-family: 'Runalto', serif; 
