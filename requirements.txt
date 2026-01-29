@@ -1,1 +1,5 @@
-fastapiuvicornopenai-chatkitopenaipython-multipart
+fastapi
+uvicorn
+openai-chatkit
+openai
+python-multipart
