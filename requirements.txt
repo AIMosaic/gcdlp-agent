@@ -1,5 +1,1 @@
-fastapi
-uvicorn
-openai-chatkit
-openai
-python-multipart
+fastapiuvicornopenai-chatkitopenaipython-multipart
