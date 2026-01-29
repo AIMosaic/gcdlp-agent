@@ -19,7 +19,7 @@
 }
 
 /* --- 3. Global Resets --- */
-/* CRITICAL: We add #root here to ensure the React container is full height */
+/* CRITICAL FIX: Ensure #root has 100% height */
 body, html, #root {
   margin: 0;
   padding: 0;
@@ -30,26 +30,24 @@ body, html, #root {
   overflow: hidden; 
 }
 
-/* --- 4. ChatKit Specific Overrides --- */
-/* Force the input area to be visible and styled */
+/* --- 4. ChatKit Overrides --- */
 [data-element="composer-input"] {
   font-family: 'Gilroy', sans-serif !important;
   color: #212326 !important;
 }
 
-/* Hide the default OpenAI branding footer if it appears */
 [data-element="footer"] {
   display: none !important;
 }
 
-/* --- 5. Button Styling (Runalto) --- */
+/* --- 5. Button Styling --- */
 [data-element="button"] {
   font-family: 'Runalto', serif !important;
   border: 1px solid #978550 !important;
   border-radius: 5px !important;
   transition: all 0.3s ease-in-out !important;
   cursor: pointer !important;
-  font-size: 20px !important; /* Desktop */
+  font-size: 20px !important; 
   background-color: #978550 !important;
   color: #FEF9EE !important;
 }
@@ -59,7 +57,6 @@ body, html, #root {
   color: #978550 !important;
 }
 
-/* --- 6. Responsive Typography --- */
 @media (max-width: 1024px) {
   [data-element="button"] { font-size: 18px !important; }
 }
@@ -68,7 +65,7 @@ body, html, #root {
   [data-element="button"] { font-size: 16px !important; }
 }
 
-/* --- 7. Custom Header Styling --- */
+/* --- 6. Header Styling --- */
 .custom-header {
   background-color: #FEF9EE;
   border-bottom: 1px solid #978550;
