@@ -5,22 +5,20 @@ import './globals.css';
 export default function App() {
   const { control } = useChatKit({
     api: {
-      // Points to your Vercel API endpoint
-      apiURL: '/api/chatkit', 
+      // Use the full absolute URL to ensure connection reliability
+      apiURL: 'https://gcdlp-agent.vercel.app/api/chatkit', 
     },
     theme: {
       colorScheme: 'light',
-      // We set base theme variables, but CSS will override buttons
       color: {
         accent: { primary: '#978550' }, 
         background: '#FEF9EE',
         text: '#212326'
       },
-      radius: 'sm', // 5px approximation
+      radius: 'sm',
     },
-    header: false, // Hiding default header to use our Custom Header
+    header: false,
     newThreadView: {
-      // This is the "Main Widget" logic rendered on start
       greeting: "Bienvenue au Grand Café de la Poste. Comment puis-je vous assister ?",
       starterPrompts: [
         { name: "Réserver", prompt: "Je voudrais réserver une table." },
@@ -31,22 +29,32 @@ export default function App() {
   });
 
   return (
-    <div className="flex flex-col h-screen w-full bg-[#FEF9EE]">
-      {/* Custom Header with Logo */}
-      <div className="custom-header shrink-0">
+    // INLINE STYLES: This specific block fixes the missing input field
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh', 
+      width: '100%', 
+      backgroundColor: '#FEF9EE',
+      overflow: 'hidden'
+    }}>
+      
+      {/* Custom Header */}
+      <div className="custom-header" style={{ flexShrink: 0 }}>
         <img 
           src="https://www.grandcafedelaposte.restaurant/grandcafedelapos/wp-content/uploads/2025/12/GCDLP_Logo_Icons_Tete_Noire_Right-1-e1769096955816.png" 
           alt="Logo" 
           className="h-10 w-auto"
+          style={{ height: '40px', width: 'auto' }}
         />
         <span className="header-title">Votre Concierge Digital</span>
       </div>
 
       {/* Chat Container */}
-      <div className="flex-1 overflow-hidden relative">
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         <ChatKit 
           control={control} 
-          className="h-full w-full"
+          style={{ height: '100%', width: '100%' }}
         />
       </div>
     </div>
