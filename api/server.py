@@ -94,11 +94,12 @@ class GCDLPServer(ChatKitServer):
             ]
         )
 
-# Initialize server
-data_store = SQLiteStore()
+# --- CRITICAL FIX: Use In-Memory Database for Vercel ---
+# Vercel does not allow writing to files (read-only system)
+# We use ":memory:" to tell SQLite to run in RAM only.
+data_store = SQLiteStore(db_path=":memory:")
 server = GCDLPServer(data_store)
 
-# CRITICAL FIX: Ensure this path matches Vercel rewrites
 @app.post("/api/chatkit")
 async def chatkit_endpoint(request: Request):
     body = await request.body()
