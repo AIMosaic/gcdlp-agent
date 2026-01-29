@@ -5,7 +5,7 @@ import './globals.css';
 export default function App() {
   const { control } = useChatKit({
     api: {
-      // Use the full absolute URL to ensure connection reliability
+      // Points to your specific Vercel backend
       apiURL: 'https://gcdlp-agent.vercel.app/api/chatkit', 
     },
     theme: {
@@ -29,7 +29,7 @@ export default function App() {
   });
 
   return (
-    // INLINE STYLES: This specific block fixes the missing input field
+    // INLINE STYLES: This explicitly forces the height to 100vh to fix the blank screen
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
