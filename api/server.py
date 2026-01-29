@@ -12,7 +12,6 @@ from typing import AsyncIterator, Any
 
 app = FastAPI()
 
-# Use environment variable in production
 apiKey = os.environ.get("OPENAI_API_KEY", "")
 
 # --- URL CONFIGURATION ---
@@ -21,7 +20,7 @@ URLS = {
     "RESERVE_SOUL": "https://widget.openflow.pro/66c87551e1bc2f3d2a7ae1b7?event=39f99b22-9294-4c54-9327-4e9f8625036b",
     "RESERVE_JAZZ": "https://widget.openflow.pro/66c87551e1bc2f3d2a7ae1b7?event=773e4bd1-761b-4767-a2c6-7d867b51278f",
     "MENU": "https://www.grandcafedelaposte.restaurant/grandcafedelapos/?page_id=273",
-    "CONTACT": "mailto:relationcommerciale.group@gmail.com" # Fallback for events
+    "CONTACT": "mailto:relationcommerciale.group@gmail.com" 
 }
 
 class GCDLPServer(ChatKitServer):
@@ -45,33 +44,23 @@ class GCDLPServer(ChatKitServer):
         is_menu = any(word in user_text for word in ["carte", "menu", "plat", "manger", "faim"])
         is_event = any(word in user_text for word in ["privé", "groupe", "anniversaire", "mariage", "event"])
         
-        # 1. Stream the text answer first (simulated agent response)
-        # In production, you would call self.client.beta.threads.runs.stream...
         assistant_text = "Voici les options disponibles pour votre demande :"
         yield Event(type="message", content=assistant_text)
 
-        # 2. Dynamic Widget Construction
+        # Dynamic Widget Construction
         widget_children = []
 
         if is_music:
-            # Show Soul & Jazz
             widget_children.append(self.create_row("Soirée Soul", "Dîners Friday Soul", "Réservez", URLS["RESERVE_SOUL"]))
             widget_children.append(Divider(color="#EBE3D0"))
             widget_children.append(self.create_row("Soirée Jazz", "Dîners Sunday Jazz", "Réservez", URLS["RESERVE_JAZZ"]))
-        
         elif is_menu:
-            # Show Menu
             widget_children.append(self.create_row("La Carte", "Découvrez nos plats", "Menu", URLS["MENU"]))
-        
         elif is_event:
-             # Event Contact
              widget_children.append(self.create_row("Événements", "Contactez notre équipe", "Contact", URLS["CONTACT"]))
-
         else:
-            # Default: General Reservation
             widget_children.append(self.create_row("Réservez votre table", "Petit déjeuner - déjeuner - dîner", "Réservez", URLS["RESERVE_TABLE"]))
 
-        # Wrap in Card
         widget = Card(
             size="sm",
             background="#FEF9EE",
@@ -109,7 +98,7 @@ class GCDLPServer(ChatKitServer):
 data_store = SQLiteStore()
 server = GCDLPServer(data_store)
 
-# --- CRITICAL FIX: Updated path to match Vercel routing ---
+# CRITICAL FIX: Ensure this path matches Vercel rewrites
 @app.post("/api/chatkit")
 async def chatkit_endpoint(request: Request):
     body = await request.body()
