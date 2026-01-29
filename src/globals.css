@@ -18,54 +18,19 @@
   font-style: normal;
 }
 
-/* --- 3. Global Resets --- */
-/* CRITICAL FIX: Ensure #root has 100% height */
-body, html, #root {
+/* --- 3. Global Resets (CRITICAL) --- */
+/* Forces the browser to give the app 100% height */
+html, body, #root {
   margin: 0;
   padding: 0;
-  font-family: 'Gilroy', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-  background-color: #FEF9EE;
   height: 100%; 
   width: 100%;
   overflow: hidden; 
+  background-color: #FEF9EE;
 }
 
-/* --- 4. ChatKit Overrides --- */
-[data-element="composer-input"] {
-  font-family: 'Gilroy', sans-serif !important;
-  color: #212326 !important;
-}
-
-[data-element="footer"] {
-  display: none !important;
-}
-
-/* --- 5. Button Styling --- */
-[data-element="button"] {
-  font-family: 'Runalto', serif !important;
-  border: 1px solid #978550 !important;
-  border-radius: 5px !important;
-  transition: all 0.3s ease-in-out !important;
-  cursor: pointer !important;
-  font-size: 20px !important; 
-  background-color: #978550 !important;
-  color: #FEF9EE !important;
-}
-
-[data-element="button"]:hover {
-  background-color: #FEF9EE !important;
-  color: #978550 !important;
-}
-
-@media (max-width: 1024px) {
-  [data-element="button"] { font-size: 18px !important; }
-}
-
-@media (max-width: 768px) {
-  [data-element="button"] { font-size: 16px !important; }
-}
-
-/* --- 6. Header Styling --- */
+/* --- 4. Styling Overrides --- */
+/* Custom Header */
 .custom-header {
   background-color: #FEF9EE;
   border-bottom: 1px solid #978550;
@@ -82,4 +47,26 @@ body, html, #root {
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-left: 12px;
+}
+
+/* Button Styling */
+[data-element="button"] {
+  font-family: 'Runalto', serif !important;
+  border: 1px solid #978550 !important;
+  border-radius: 5px !important;
+  transition: all 0.3s ease-in-out !important;
+  cursor: pointer !important;
+  font-size: 20px !important;
+  background-color: #978550 !important;
+  color: #FEF9EE !important;
+}
+
+[data-element="button"]:hover {
+  background-color: #FEF9EE !important;
+  color: #978550 !important;
+}
+
+/* Hide Default Footer */
+[data-element="footer"] {
+  display: none !important;
 }
