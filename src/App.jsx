@@ -5,8 +5,8 @@ import './globals.css';
 export default function App() {
   const { control } = useChatKit({
     api: {
-      // Points to your specific Vercel backend
-      apiURL: 'https://gcdlp-agent.vercel.app/api/chatkit', 
+      // Use the relative path to avoid any CORS/domain issues
+      apiURL: '/api/chatkit', 
     },
     theme: {
       colorScheme: 'light',
@@ -29,7 +29,7 @@ export default function App() {
   });
 
   return (
-    // INLINE STYLES: This explicitly forces the height to 100vh to fix the blank screen
+    // FORCE FULL HEIGHT
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
@@ -39,7 +39,7 @@ export default function App() {
       overflow: 'hidden'
     }}>
       
-      {/* Custom Header */}
+      {/* HEADER */}
       <div className="custom-header" style={{ flexShrink: 0 }}>
         <img 
           src="https://www.grandcafedelaposte.restaurant/grandcafedelapos/wp-content/uploads/2025/12/GCDLP_Logo_Icons_Tete_Noire_Right-1-e1769096955816.png" 
@@ -50,12 +50,14 @@ export default function App() {
         <span className="header-title">Votre Concierge Digital</span>
       </div>
 
-      {/* Chat Container */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        <ChatKit 
-          control={control} 
-          style={{ height: '100%', width: '100%' }}
-        />
+      {/* CHAT CONTAINER - Forces ChatKit to fill the remaining space */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, height: '100%', width: '100%' }}>
+            <ChatKit 
+              control={control} 
+              style={{ height: '100%', width: '100%' }}
+            />
+        </div>
       </div>
     </div>
   );
