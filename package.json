@@ -1,9 +1,1 @@
-{
-  "name": "gcdlp-backend",
-  "version": "1.0.0",
-  "description": "Backend token generator for ChatKit",
-  "main": "api/token.js",
-  "dependencies": {
-    "node-fetch": "^3.3.2"
-  }
-}
+
