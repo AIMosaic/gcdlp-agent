@@ -74,15 +74,16 @@
                         }
                     }
                 },
-                // Fixed: theme as a string per protocol validation error
+                // Protocol: theme must be a string "light" or "dark"
                 theme: "light",
-                startScreen: {
+                // Protocol: "newThreadView" is the standard key for starter screens
+                newThreadView: {
                     greeting: "Bienvenue au Grand Café de la Poste",
-                    // Fixed: 'name' changed to 'label' per protocol validation error
-                    prompts: [
+                    // Protocol: 'label' for text and valid icons like 'calendar', 'sparkle', 'message'
+                    starterPrompts: [
                         { label: "Réserver une table", prompt: "Je voudrais réserver une table.", icon: "calendar" },
-                        { label: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "book" },
-                        { label: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "users" }
+                        { label: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "sparkle" },
+                        { label: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "message" }
                     ]
                 },
                 composer: {
