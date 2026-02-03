@@ -12,7 +12,7 @@
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* Beige Page Background (The Outer Frame) */
+            background-color: #FEF9EE; /* Beige Page Background (The Frame) */
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             overflow: hidden; 
             display: flex;
@@ -20,11 +20,11 @@
             padding: 0; 
         }
 
-        /* 2. CUSTOM HEADER (Forced White) */
+        /* 2. CUSTOM HEADER (White Background, Gold Text) */
         .custom-header {
             flex: 0 0 65px; 
             background-color: #FFFFFF !important; /* Force White */
-            border-bottom: 1.5px solid #978550; /* Gold Line */
+            border-bottom: 1.5px solid #978550; /* Gold Line 1.5px */
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -41,7 +41,7 @@
             text-transform: uppercase;
         }
 
-        /* 3. CHAT WRAPPER (Forced White with Gold Frame) */
+        /* 3. CHAT WRAPPER (White Background, Gold Border) */
         #chat-wrapper {
             flex: 1; 
             position: relative;
@@ -85,14 +85,14 @@
         <span class="header-title">Votre Concierge Digital</span>
     </div>
 
-    <!-- CHAT AREA -->
+    <!-- CHAT AREA (Framed in Gold) -->
     <div id="chat-wrapper">
         <div id="chat-mount" style="width:100%; height:100%"></div>
     </div>
 
     <script>
         const TOKEN_URL = "/api/token"; 
-        console.log("GCC: Loading Version 3.0 (White Header + Gold Frame)...");
+        console.log("GCC: Loading Version 4.0 (White Header + Gold Frame)...");
 
         async function init() {
             try {
@@ -112,7 +112,7 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // Run the "Eraser" to remove English text
+                // Clean the "What can I help with?" text
                 cleanInterface(chat);
 
             } catch (err) {
