@@ -22,10 +22,11 @@ export default async function handler(req, res) {
   const userId = "guest-" + Math.random().toString(36).substring(7);
 
   try {
-    // FIX: Removed 'trusted_origins' as it caused the 400 error
+    // FIX: Send IDs as direct strings, not objects
+    // The API expects "user" and "workflow" (or workflow_id) to be strings
     const payload = {
-        workflow: { id: WORKFLOW_ID },
-        user: { id: userId }
+        workflow_id: WORKFLOW_ID, // Standard parameter for V1 beta
+        user_id: userId           // Standard parameter for V1 beta
     };
 
     console.log("Sending request to OpenAI with Agent ID:", WORKFLOW_ID);
@@ -43,6 +44,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
         const errorText = await response.text();
         console.error("OpenAI API Error:", response.status, errorText);
+        // Return the EXACT error to the frontend
         return res.status(response.status).json({ error: 'OpenAI Error', details: errorText });
     }
 
