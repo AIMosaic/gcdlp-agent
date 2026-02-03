@@ -12,19 +12,20 @@
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* Beige Page Background */
+            background-color: #FEF9EE; /* Beige Page Background (The Frame) */
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             overflow: hidden; 
             display: flex;
             flex-direction: column;
-            padding: 0; /* Flush with screen edges */
+            padding: 0; 
         }
 
         /* 2. CUSTOM HEADER (White Background, Gold Text) */
         .custom-header {
             flex: 0 0 65px; 
-            background-color: #FFFFFF; /* White Background */
-            border-bottom: 1.5px solid #978550; /* Gold Line 1.5px */
+            /* FORCE WHITE BACKGROUND */
+            background-color: #FFFFFF !important; 
+            border-bottom: 1.5px solid #978550; 
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -45,19 +46,16 @@
         #chat-wrapper {
             flex: 1; 
             position: relative;
-            background-color: #FFFFFF; /* White Background */
+            /* FORCE WHITE BACKGROUND */
+            background-color: #FFFFFF !important; 
             
             /* --- THE GOLD FRAME --- */
-            /* We treat the header and chat as one stack */
             border-left: 1.5px solid #978550;
             border-right: 1.5px solid #978550;
             border-bottom: 1.5px solid #978550;
-            /* Top border is handled by the header's bottom border */
             
-            /* Rounded corners on the bottom only to act as the "End" of the card */
-            /* If the whole thing is a popup, this looks seamless */
             border-radius: 0 0 5px 5px; 
-            
+            margin: 0px; 
             overflow: hidden; 
         }
 
@@ -95,6 +93,7 @@
 
     <script>
         const TOKEN_URL = "/api/token"; 
+        console.log("GCC: Loading Version 2.0 (White Header)..."); // Debug Marker
 
         async function init() {
             try {
@@ -114,7 +113,7 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // Clean the "What can I help with?" text
+                // Eraser Script
                 cleanInterface(chat);
 
             } catch (err) {
@@ -127,7 +126,6 @@
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
-                // Erase English Greeting
                 const textElements = shadow.querySelectorAll('h2, h3, div');
                 textElements.forEach(el => {
                     if (el.innerText && (el.innerText.includes("What can I help") || el.innerText.includes("help with today"))) {
@@ -135,7 +133,6 @@
                     }
                 });
 
-                // Clean Input Placeholder
                 const inputs = shadow.querySelectorAll('textarea, input');
                 inputs.forEach(input => {
                     if (input.placeholder && input.placeholder.includes("Message")) {
