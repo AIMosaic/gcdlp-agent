@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concierge</title>
+    <!-- Load ChatKit JS -->
+    <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js" defer></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #ffffff; /* Standard White per Protocol */
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Ensure the web component fills the screen */
+        openai-chatkit {
+            display: block;
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- The ChatKit Web Component -->
+    <openai-chatkit id="chatkit"></openai-chatkit>
+
+    <script>
+        window.onload = () => {
+            const chatkit = document.getElementById('chatkit');
+
+            chatkit.setOptions({
+                api: {
+                    // This function calls your Vercel /api/token.js endpoint
+                    async getClientSecret() {
+                        try {
+                            const res = await fetch('/api/token', { 
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                            
+                            if (!res.ok) throw new Error('Failed to fetch session');
+                            
+                            const data = await res.json();
+                            // OpenAI returns { client_secret: "..." }
+                            return data.client_secret;
+                        } catch (err) {
+                            console.error("ChatKit Auth Error:", err);
+                        }
+                    }
+                },
+                theme: {
+                    colorScheme: "light",
+                    radius: "medium",
+                    density: "comfortable"
+                },
+                startScreen: {
+                    greeting: "Bienvenue au Grand Café de la Poste",
+                    prompts: [
+                        { name: "Réserver une table", prompt: "Je voudrais réserver une table.", icon: "calendar" },
+                        { name: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "book" },
+                        { name: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "users" }
+                    ]
+                },
+                composer: {
+                    placeholder: "Demandez au concierge..."
+                }
+            });
+        };
+    </script>
+</body>
+</html>
