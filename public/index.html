@@ -23,7 +23,6 @@
             height: 100vh;
         }
 
-        /* Error message style for debugging */
         #error-display {
             display: none;
             padding: 20px;
@@ -33,6 +32,11 @@
             margin: 10px;
             border-radius: 4px;
             font-size: 14px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
     </style>
 </head>
@@ -61,31 +65,24 @@
                                 throw new Error(data.details || data.error || 'Erreur lors de la récupération du jeton');
                             }
                             
-                            if (!data.client_secret) {
-                                throw new Error("Le secret client est manquant dans la réponse de l'API.");
-                            }
-
                             return data.client_secret;
                         } catch (err) {
                             console.error("ChatKit Auth Error:", err);
-                            // Show a small hint if it's failing
                             errorDisplay.style.display = 'block';
                             errorDisplay.innerText = "Erreur de connexion : " + err.message;
                             return null;
                         }
                     }
                 },
-                theme: {
-                    colorScheme: "light",
-                    radius: "medium",
-                    density: "comfortable"
-                },
+                // Fixed: theme as a string per protocol validation error
+                theme: "light",
                 startScreen: {
                     greeting: "Bienvenue au Grand Café de la Poste",
+                    // Fixed: 'name' changed to 'label' per protocol validation error
                     prompts: [
-                        { name: "Réserver une table", prompt: "Je voudrais réserver une table.", icon: "calendar" },
-                        { name: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "book" },
-                        { name: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "users" }
+                        { label: "Réserver une table", prompt: "Je voudrais réserver une table.", icon: "calendar" },
+                        { label: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "book" },
+                        { label: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "users" }
                     ]
                 },
                 composer: {
