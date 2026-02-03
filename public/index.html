@@ -12,31 +12,42 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            background-color: #ffffff; /* Standard White per Protocol */
+            background-color: #ffffff;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Ensure the web component fills the screen */
         openai-chatkit {
             display: block;
             width: 100%;
             height: 100vh;
         }
+
+        /* Error message style for debugging */
+        #error-display {
+            display: none;
+            padding: 20px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            margin: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- The ChatKit Web Component -->
+    <div id="error-display"></div>
     <openai-chatkit id="chatkit"></openai-chatkit>
 
     <script>
         window.onload = () => {
             const chatkit = document.getElementById('chatkit');
+            const errorDisplay = document.getElementById('error-display');
 
             chatkit.setOptions({
                 api: {
-                    // This function calls your Vercel /api/token.js endpoint
                     async getClientSecret() {
                         try {
                             const res = await fetch('/api/token', { 
@@ -44,13 +55,23 @@
                                 headers: { 'Content-Type': 'application/json' }
                             });
                             
-                            if (!res.ok) throw new Error('Failed to fetch session');
-                            
                             const data = await res.json();
-                            // OpenAI returns { client_secret: "..." }
+
+                            if (!res.ok) {
+                                throw new Error(data.details || data.error || 'Erreur lors de la récupération du jeton');
+                            }
+                            
+                            if (!data.client_secret) {
+                                throw new Error("Le secret client est manquant dans la réponse de l'API.");
+                            }
+
                             return data.client_secret;
                         } catch (err) {
                             console.error("ChatKit Auth Error:", err);
+                            // Show a small hint if it's failing
+                            errorDisplay.style.display = 'block';
+                            errorDisplay.innerText = "Erreur de connexion : " + err.message;
+                            return null;
                         }
                     }
                 },
