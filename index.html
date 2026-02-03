@@ -12,7 +12,7 @@
         body, html { 
             margin: 0; padding: 0; 
             height: 100%; width: 100%; 
-            background-color: #FEF9EE; /* Beige Page Background (The Frame) */
+            background-color: #FEF9EE; /* Beige Page Background (The Outer Frame) */
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             overflow: hidden; 
             display: flex;
@@ -20,12 +20,11 @@
             padding: 0; 
         }
 
-        /* 2. CUSTOM HEADER (White Background, Gold Text) */
+        /* 2. CUSTOM HEADER (Forced White) */
         .custom-header {
             flex: 0 0 65px; 
-            /* FORCE WHITE BACKGROUND */
-            background-color: #FFFFFF !important; 
-            border-bottom: 1.5px solid #978550; 
+            background-color: #FFFFFF !important; /* Force White */
+            border-bottom: 1.5px solid #978550; /* Gold Line */
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -42,18 +41,18 @@
             text-transform: uppercase;
         }
 
-        /* 3. CHAT WRAPPER (White Background, Gold Border) */
+        /* 3. CHAT WRAPPER (Forced White with Gold Frame) */
         #chat-wrapper {
             flex: 1; 
             position: relative;
-            /* FORCE WHITE BACKGROUND */
-            background-color: #FFFFFF !important; 
+            background-color: #FFFFFF !important; /* Force White */
             
             /* --- THE GOLD FRAME --- */
             border-left: 1.5px solid #978550;
             border-right: 1.5px solid #978550;
             border-bottom: 1.5px solid #978550;
             
+            /* Round bottom corners to finish the "Card" look */
             border-radius: 0 0 5px 5px; 
             margin: 0px; 
             overflow: hidden; 
@@ -86,14 +85,14 @@
         <span class="header-title">Votre Concierge Digital</span>
     </div>
 
-    <!-- CHAT AREA (Framed in Gold) -->
+    <!-- CHAT AREA -->
     <div id="chat-wrapper">
         <div id="chat-mount" style="width:100%; height:100%"></div>
     </div>
 
     <script>
         const TOKEN_URL = "/api/token"; 
-        console.log("GCC: Loading Version 2.0 (White Header)..."); // Debug Marker
+        console.log("GCC: Loading Version 3.0 (White Header + Gold Frame)...");
 
         async function init() {
             try {
@@ -113,7 +112,7 @@
 
                 document.getElementById('chat-mount').appendChild(chat);
                 
-                // Eraser Script
+                // Run the "Eraser" to remove English text
                 cleanInterface(chat);
 
             } catch (err) {
@@ -126,6 +125,7 @@
                 const shadow = chatElement.shadowRoot;
                 if (!shadow) return;
 
+                // Hide "What can I help with?"
                 const textElements = shadow.querySelectorAll('h2, h3, div');
                 textElements.forEach(el => {
                     if (el.innerText && (el.innerText.includes("What can I help") || el.innerText.includes("help with today"))) {
@@ -133,6 +133,7 @@
                     }
                 });
 
+                // Clean/Translate Input Placeholder
                 const inputs = shadow.querySelectorAll('textarea, input');
                 inputs.forEach(input => {
                     if (input.placeholder && input.placeholder.includes("Message")) {
