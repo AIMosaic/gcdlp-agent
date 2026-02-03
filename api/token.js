@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   // 1. Get Secrets from Vercel
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  // We use the ID you provided in the chat
+  // Use the ID from your environment variables, or fallback to the one you provided
   const WORKFLOW_ID = process.env.WORKFLOW_ID || "wf_696e4bf2f6388190a5be5b9131c25da80d03b88b29395e06";
 
   if (!OPENAI_API_KEY) {
@@ -22,11 +22,12 @@ export default async function handler(req, res) {
   const userId = "guest-" + Math.random().toString(36).substring(7);
 
   try {
-    // FIX: Send IDs as direct strings, not objects
-    // The API expects "user" and "workflow" (or workflow_id) to be strings
+    // FIX: The Hybrid Payload Structure
+    // - "workflow" is an OBJECT { id: ... }
+    // - "user" is a STRING
     const payload = {
-        workflow_id: WORKFLOW_ID, // Standard parameter for V1 beta
-        user_id: userId           // Standard parameter for V1 beta
+        workflow: { id: WORKFLOW_ID }, 
+        user: userId           
     };
 
     console.log("Sending request to OpenAI with Agent ID:", WORKFLOW_ID);
@@ -44,7 +45,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
         const errorText = await response.text();
         console.error("OpenAI API Error:", response.status, errorText);
-        // Return the EXACT error to the frontend
+        // Return the EXACT error to the frontend for debugging
         return res.status(response.status).json({ error: 'OpenAI Error', details: errorText });
     }
 
