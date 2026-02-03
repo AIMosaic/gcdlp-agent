@@ -74,13 +74,11 @@
                         }
                     }
                 },
-                // Protocol: theme must be a string "light" or "dark"
                 theme: "light",
-                // Protocol: "newThreadView" is the standard key for starter screens
-                newThreadView: {
+                // Protocol: Using the 'welcome' key which is often the required path for Beta deployments
+                welcome: {
                     greeting: "Bienvenue au Grand Café de la Poste",
-                    // Protocol: 'label' for text and valid icons like 'calendar', 'sparkle', 'message'
-                    starterPrompts: [
+                    prompts: [
                         { label: "Réserver une table", prompt: "Je voudrais réserver une table.", icon: "calendar" },
                         { label: "Voir le menu", prompt: "Pouvez-vous me montrer le menu actuel ?", icon: "sparkle" },
                         { label: "Événements privés", prompt: "Parlez-moi de l'organisation d'un événement ici.", icon: "message" }
